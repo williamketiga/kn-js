@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime Chat App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        #chat-box{
+            height: 400px;
+            overflow-y: scroll;
+            border: 1px solid whitesmoke;
+            padding: 15px;
+            background: cadetblue;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h3 class="text-cent4er">Realtime Chat App</h3>
+        <p>This Project uses Express JS, SocketIO and MongoDB (Atlas)</p>
+        <div class="input-group" id="chat-box"></div>
+        <form class="input-group" id="chat-form">
+            <input type="text" class="form-control" id="username" placeholder="Your username" required>
+            <input type="text" class="form-control" id="message" placeholder="Type a message..." required>
+            <button class="btn btn-secondary" type="submit">Send</button>
+        </form>
+    </div>
+    <script>
+        const socket = io()
+        const chatBox = document.getElementById("chat-box")
+        const chatForm = document.getElementById("chat-form")
+        const usernameInput = document.getElementById("username")
+        const messageInput = document.getElementById("message")
+        fetch("/api/messages")
+        .then((res) => res.json())
+        .then((messages) =>{
+            messages.reverse().forEach(addMessageToBox)
+        })
+        socket.on("chat message", (msg) => {
+            addMessageToBox(msg)
+        })
+        chatForm.addEventListener("submit", (e) => {
+            e.preventDefault()
+            const msg = {
+                username : usernameInput.value.trim(),
+                message : messageInput.value.trim()
+            }
+            if (!msg.username || !msg.message) return;
+            socket.emit("chat message", msg)
+            messageInput.value = ""
+        })
+        function addMessageToBox(msg){
+            const div = document.createElement("div")
+            div.classList.add("mb-4")
+            div.innerHTML = `<strong>${msg.username}</strong> : <i>${msg.message}</i><br>`
+            chatBox.appendChild(div)
+            chatBox.scrollTop = chatBox.scrollHeight
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+</body>
+</html>
