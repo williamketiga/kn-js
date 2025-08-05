@@ -2,7 +2,7 @@ const Chat = require('../model/chatModel')
 exports.getMessages = async(req,res) => {
     try{
         const chats = await Chat.find().sort({
-            createdAt: -1
+            createdAt: 1
         }).limit(50)
         res.json(chats)
     } catch (error) {
