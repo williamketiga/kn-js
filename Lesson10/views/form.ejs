@@ -10,8 +10,12 @@
     <div class="container mt-5">
         <form method="post" action="/create">
             <div class="mb-3">
-                <label for="sender" class="form-label">Sender</label>
-                <input type="text" class="form-control" id="sender" name="sender">
+                <label for="reciever" class="form-label">Reciever</label>
+                <select name="reciever" id="reciever" class="form-select" required>
+                    <% users.forEach(user => { %>
+                        <option value="<%= user._id %>"><%= user.username %></option>
+                    <% }) %>
+                </select>
             </div>
             <div class="mb-3">
                 <label for="message" class="form-label">Message</label>
