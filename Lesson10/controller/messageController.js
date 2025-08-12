@@ -56,8 +56,8 @@ exports.createMessage = async(req,res) => {
         const receiverSocket = req.onlineUsers[receiver]
         if (receiverSocket){
             req.io.to(receiverSocket).emit('newMessage', {
-                from: req.session.username,
-                content: 
+                from: req.session.user.username,
+                content
             })
         }
     } catch(e) {
