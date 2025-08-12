@@ -1,29 +1,88 @@
 const mongoose = require('mongoose')
 const Message = require('../model/messageModel')
 const User = require('../model/userModel')
+const crypto = require('crypto')
+const {encrypt, decrypt} = require('../middleware/crypto')
 exports.getAllMessages = async(req,res) => {
-    const messages = await Message.find().sort({createdAt : -1})
-    res.render('index', {messages})
+    try {
+        const userId = req.session.user.id
+        const messages = await Message.find({
+            $or : [
+                {sender : userId},
+                {receiver : userId},
+            ],
+            iv : {$exists : true}
+        })
+        .populate('sender', 'username')
+        .populate('receiver', 'username')
+        .sort({createdAt:-1})
+        console.log(`Message Retrieve : ${messages}`);
+        if (!messages.length) {
+            return res.render('index', {
+                messages : [],
+                noMessages : true,
+                session : req.session
+            })
+        }
+        const decryptedMessage = messages.map(msg=>{
+            const decrypted = decrypt(msg.content, msg.iv)
+            return {
+                ...msg.toObject(),
+                content : decrypted
+            }
+        })
+        res.render('index', {
+            messages : decryptedMessage,
+            noMessages : false,
+            session : req.session
+        })
+    } catch (err) {
+        console.error(`Error ${err}`)
+        res.status(500).send('Error fetching messages')
+    }
 }
 exports.createMessage = async(req,res) => {
-    const {sender, reciever, content} = req.body
+    const {receiver, content} = req.body
+    console.log(content)
+    const sender = req.session.user.id
+    const encryptedContent = encrypt(content)
     try{
-        await Message.create({
+        const message = await Message.create({
             sender,
-            reciever,
-            content
+            receiver,
+            content: encryptedContent.data,
+            iv: encryptedContent.iv
         })
+        const receiverSocket = req.onlineUsers[receiver]
+        if (receiverSocket){
+            req.io.to(receiverSocket).emit('newMessage', {
+                from: req.session.username,
+                content: 
+            })
+        }
     } catch(e) {
         console.error(`Error creating message: ${e}`);
     }
     res.redirect('/')
 }
 exports.getMessageById = async(req,res) => {
-    const message = await Message.findById(req.params.id)
-    if (message){
-        res.render('detail', {message})
-    } else {
-        res.status(404).send('Message not found')
+    try {
+        const message = await Message.findById(req.params.id)
+        .populate('sender', 'username')
+        .populate('receiver', 'username')
+        if (!message) {
+            return res.status(404).send('Message not found!')
+        }
+        const decryptedMessage = {
+            ...message.toObject(),
+            content : decrypt(message.content, message.iv)
+        }
+        res.render('detail', {
+            message : decryptedMessage
+        })
+    } catch(err) {
+        console.error(`Error fetching message ${err}`)
+        res.status(500).send('Internal Server Error')
     }
 }
 exports.deleteMessage = async(req,res) => {

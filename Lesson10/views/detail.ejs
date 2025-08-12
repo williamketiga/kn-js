@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Message detail</h1>
-    <p><strong>Sender: </strong><%= message.sender %></p>
+    <p><strong>Sender: </strong><%= message.sender.username %></p>
     <p><strong>Message: </strong><%= message.content %></p>
     <p><%
     const dateFromDb = message.createdAt

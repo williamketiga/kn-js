@@ -26,7 +26,7 @@
                     <% messages.forEach(msg => { %>
                         <li class="list-group-item">
                             <a href="/detail/<%= msg._id %>">
-                                <%= msg.sender %> - <%= msg.content %>
+                                <%= msg.sender.username %> - <%= msg.content %>
                             </a>
                             <form action="/delete/<%= msg.id %>" method="post">
                                 <button class="btn btn-danger" type="submit">Delete</button>
