@@ -1,0 +1,1 @@
+npm i express express-session ejs mongoose crypto bcrypt dotenv
