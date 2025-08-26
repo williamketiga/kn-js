@@ -7,16 +7,18 @@ exports.showLogin = (req,res) => {
     res.render('auth/login', {title : "Login Page"})
 }
 exports.registerUser = async(req,res) => {
-    const { username , password } = req.body
+    const { username , email , password } = req.body
     try{
         const user = new User({
             username,
+            email,
             password
         })
         await user.save()
         res.redirect('/auth/login')
     } catch(err) {
         res.status(401).send("Registration failed : ", err.message)
+        console.log(err);
     }
 }
 exports.loginUser = async(req,res) => {
@@ -29,11 +31,11 @@ exports.loginUser = async(req,res) => {
     if (!isMatch) {
         return res.redirect('/auth/login')
     }
-    req.session.user = {
+    req.session = {
         id : user._id,
         username : user.username
     }
-    res.redirect('/')
+    res.redirect('/feeds')
 }
 exports.logoutUser = (req,res) => {
     req.session.destroy(() => {
