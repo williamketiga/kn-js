@@ -1,17 +1,43 @@
+const { cloudinary } = require('../config/cloudinary');
 const Post = require('../models/postModel')
 exports.showPostForm = async(req,res) => {
-    res.render('post/create')
+    res.render('posts/create')
 }
 exports.createPost = async(req,res) => {
     try{
+        console.log(req.session.user);
         const userId = req.session.user.id
-        const {caption, imageUrl, videoUrl} = req.body
-        const Post = await Post.create({
+        const {caption} = req.body
+        // const imageUrl = req.files?.image ? req.files.image[0].path : null
+        // const videoUrl = req.files?.video ? req.files.video[0].path : null
+        let imageUrl = null
+        let videoUrl = null
+        if (req.files?.image){
+            const result = await cloudinary.uploader.upload(
+                req.files.image[0].path,
+                {
+                    folder : "posts/images"
+                }
+            )
+            imageUrl = result.secure_url
+        }
+        if (req.files?.video){
+            const result = await cloudinary.uploader.upload(
+                req.files.video[0].path,
+                {
+                    folder : "posts/videos"
+                }
+            )
+            imageUrl = result.secure_url
+        }
+        const post = await Post.create({
             userId,
             caption,
             imageUrl,
             videoUrl
         })
+        console.log(res.status(201).json(post));
+        res.redirect('/feeds')
     } catch(error){
         console.error(`Error : ${error}`)
     }

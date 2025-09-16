@@ -31,9 +31,10 @@ exports.loginUser = async(req,res) => {
     if (!isMatch) {
         return res.redirect('/auth/login')
     }
-    req.session = {
+    req.session.user = {
         id : user._id,
-        username : user.username
+        username : user.username,
+        email : user.email
     }
     res.redirect('/feeds')
 }

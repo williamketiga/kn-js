@@ -8,6 +8,17 @@ const homeRoutes = require('./routes/homeRoutes')
 const postRoutes = require('./routes/postRoutes')
 const app = express()
 const PORT = process.env.port || 5000
+app.use(
+    session({
+        secret : process.env.JWT_PHRASE,
+        resave : false,
+        saveUninitialized : false,
+        cookie : {
+            maxAge : 1000 * 3600,
+            
+        }
+    })
+)
 app.use(express.json())
 app.use(express.urlencoded({
     extended : true

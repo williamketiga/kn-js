@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4 mb-2">
+        <h1>Create Post</h1>
+        <form action="store" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="caption">Caption: </label>
+                <textarea class="form-control" id="floatingTextarea" name="caption"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">Image: </label>
+                <input class="form-control" type="file" id="image" name="image">
+            </div>
+            <div class="mb-3">
+                <label for="video" class="form-label">Video: </label>
+                <input class="form-control" type="file" id="video" name="video">
+            </div>
+            <button class="btn btn-primary">Post</button>
+        </form>
+    </div>
+</body>
+</html>
