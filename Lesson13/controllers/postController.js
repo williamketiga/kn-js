@@ -5,41 +5,50 @@ exports.showPostForm = async(req,res) => {
 }
 exports.createPost = async(req,res) => {
     try{
-        console.log(req.session.user);
         const userId = req.session.user.id
         const {caption} = req.body
         // const imageUrl = req.files?.image ? req.files.image[0].path : null
         // const videoUrl = req.files?.video ? req.files.video[0].path : null
+        res.redirect('/feeds')
+        processUploadInBackground(req.files,userId,caption)
+    } catch(error){
+        console.error(`Error : ${error}`)
+    }
+}
+async function processUploadInBackground(files,userId,caption){
+    try{
         let imageUrl = null
         let videoUrl = null
-        if (req.files?.image){
+        if (files?.image){
+            console.log('Uploading image')
             const result = await cloudinary.uploader.upload(
-                req.files.image[0].path,
+                files.image[0].path,
                 {
                     folder : "posts/images"
                 }
             )
             imageUrl = result.secure_url
         }
-        if (req.files?.video){
+        if (files?.video){
+            console.log('Uploading video')
             const result = await cloudinary.uploader.upload(
-                req.files.video[0].path,
+                files.video[0].path,
                 {
                     folder : "posts/videos"
                 }
             )
             imageUrl = result.secure_url
         }
-        const post = await Post.create({
+        await Post.create({
             userId,
-            caption,
+            caption : caption?.trim() || '',
             imageUrl,
             videoUrl
         })
-        console.log(res.status(201).json(post));
-        res.redirect('/feeds')
-    } catch(error){
-        console.error(`Error : ${error}`)
+        console.log('Post created successfully');
+        
+    } catch(err) {
+        console.error(`Error ${err}`);
     }
 }
 exports.showEditForm = async(req,res) => {
@@ -83,7 +92,10 @@ exports.getAllPosts = async(req,res) => {
         if (!posts){
             console.error(`Failed to load posts ${posts}`)
         }
-        res.render('post/index', posts)
+        console.log(posts);
+        res.render('feeds/index', {
+            posts : posts
+        })
     } catch(error){
         console.error(`Error : ${error}`)
     }
