@@ -81,7 +81,7 @@ exports.getMessageById = async(req,res) => {
             message : decryptedMessage
         })
     } catch(err) {
-        console.error(`Error fetching message ${err}`)
+        console.error(`Error fetching message: ${err}`)
         res.status(500).send('Internal Server Error')
     }
 }
